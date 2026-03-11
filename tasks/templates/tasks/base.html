@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Taskflow{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #111118;
+            --surface2: #1a1a24;
+            --border: #222230;
+            --text: #e8e8f0;
+            --muted: #6b6b80;
+            --accent: #7c6af0;
+            --accent2: #a78bfa;
+            --green: #34d399;
+            --yellow: #fbbf24;
+            --red: #f87171;
+            --blue: #60a5fa;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Background texture */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,106,240,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 110%, rgba(167,139,250,0.08) 0%, transparent 55%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app-wrapper { position: relative; z-index: 1; }
+
+        /* NAV */
+        nav {
+            background: rgba(17,17,24,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+
+        .nav-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: var(--accent2);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-logo span { color: var(--text); }
+
+        .nav-links { display: flex; gap: 0.25rem; align-items: center; }
+
+        .nav-link {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.4rem 0.85rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover { color: var(--text); background: var(--surface2); }
+        .nav-link.active { color: var(--accent2); background: rgba(124,106,240,0.12); }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--muted);
+        }
+
+        /* MAIN */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1.1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-primary:hover { background: #6b5ae0; transform: translateY(-1px); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+        .btn-danger {
+            background: rgba(248,113,113,0.12);
+            color: var(--red);
+            border: 1px solid rgba(248,113,113,0.2);
+        }
+        .btn-danger:hover { background: rgba(248,113,113,0.2); }
+
+        .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+
+        /* FORM INPUTS */
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.85rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124,106,240,0.15);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder { color: var(--muted); }
+
+        .form-select option { background: var(--surface2); }
+
+        .form-color {
+            width: 48px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: none;
+            cursor: pointer;
+            padding: 2px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .form-label { font-size: 0.8rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .badge-todo { background: rgba(107,107,128,0.2); color: var(--muted); }
+        .badge-in_progress { background: rgba(96,165,250,0.15); color: var(--blue); }
+        .badge-done { background: rgba(52,211,153,0.15); color: var(--green); }
+
+        .badge-low { background: rgba(52,211,153,0.12); color: var(--green); }
+        .badge-medium { background: rgba(251,191,36,0.12); color: var(--yellow); }
+        .badge-high { background: rgba(248,113,113,0.12); color: var(--red); }
+        .badge-urgent { background: rgba(248,113,113,0.25); color: #ff5f5f; border: 1px solid rgba(248,113,113,0.3); }
+
+        /* MESSAGES */
+        .messages { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            background: rgba(52,211,153,0.1);
+            border: 1px solid rgba(52,211,153,0.2);
+            color: var(--green);
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+<div class="app-wrapper">
+    {% if user.is_authenticated %}
+    <nav>
+        <div class="nav-inner">
+            <a href="/" class="nav-logo">task<span>flow</span></a>
+            <div class="nav-links">
+                <a href="/" class="nav-link {% block nav_dash %}{% endblock %}">Dashboard</a>
+                <a href="{% url 'task_create' %}" class="nav-link {% block nav_new %}{% endblock %}">+ New Task</a>
+                <a href="{% url 'categories' %}" class="nav-link {% block nav_cats %}{% endblock %}">Categories</a>
+            </div>
+            <div class="nav-user">
+                <span>{{ user.username }}</span>
+                <a href="{% url 'logout' %}" class="btn btn-ghost btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main>
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register — Taskflow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0a0a0f; --surface: #111118; --surface2: #1a1a24;
+            --border: #222230; --text: #e8e8f0; --muted: #6b6b80;
+            --accent: #7c6af0; --accent2: #a78bfa;
+        }
+        body {
+            font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        }
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background: radial-gradient(ellipse 60% 50% at 30% 20%, rgba(124,106,240,0.15) 0%, transparent 60%),
+                        radial-gradient(ellipse 50% 40% at 70% 80%, rgba(167,139,250,0.1) 0%, transparent 55%);
+            pointer-events: none;
+        }
+        .auth-container { position: relative; width: 100%; max-width: 400px; padding: 1rem; }
+        .auth-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.75rem; color: var(--accent2); text-align: center; margin-bottom: 0.25rem; letter-spacing: -0.03em; }
+        .auth-logo span { color: var(--text); }
+        .auth-tagline { text-align: center; color: var(--muted); font-size: 0.875rem; margin-bottom: 2rem; }
+        .auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; }
+        .auth-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.25rem; margin-bottom: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+        .form-label { font-size: 0.8rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .form-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; color: var(--text); font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.2s; width: 100%; }
+        .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,106,240,0.15); }
+        .form-input::placeholder { color: var(--muted); }
+        .btn-primary { width: 100%; background: var(--accent); color: white; border: none; border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.95rem; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 0.5rem; transition: all 0.2s; }
+        .btn-primary:hover { background: #6b5ae0; transform: translateY(-1px); }
+        .auth-footer { text-align: center; margin-top: 1.25rem; font-size: 0.875rem; color: var(--muted); }
+        .auth-footer a { color: var(--accent2); text-decoration: none; }
+        .auth-footer a:hover { text-decoration: underline; }
+        .errorlist { list-style: none; }
+        .errorlist li { font-size: 0.8rem; color: #f87171; margin-top: 0.25rem; }
+        .non-field-errors { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: #f87171; }
+    </style>
+</head>
+<body>
+<div class="auth-container">
+    <div class="auth-logo">task<span>flow</span></div>
+    <p class="auth-tagline">Start organizing your work today</p>
+
+    <div class="auth-card">
+        <h2 class="auth-title">Create account</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="non-field-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                {{ form.password1 }}
+                {{ form.password1.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                {{ form.password2 }}
+                {{ form.password2.errors }}
+            </div>
+            <button type="submit" class="btn-primary">Create Account →</button>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="{% url 'login' %}">Sign in</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

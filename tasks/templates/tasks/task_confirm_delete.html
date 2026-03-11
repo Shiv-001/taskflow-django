@@ -1,0 +1,31 @@
+{% extends "tasks/base.html" %}
+{% block title %}Delete Task — Taskflow{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .confirm-page { max-width: 500px; margin: 0 auto; text-align: center; padding: 3rem 0; }
+    .confirm-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .confirm-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .confirm-task { color: var(--accent2); font-weight: 600; }
+    .confirm-msg { color: var(--muted); margin-bottom: 2rem; }
+    .confirm-actions { display: flex; gap: 0.75rem; justify-content: center; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirm-page">
+    <div class="confirm-icon">⚠</div>
+    <h1 class="confirm-title">Delete Task?</h1>
+    <p class="confirm-msg">
+        You're about to delete <span class="confirm-task">"{{ task.title }}"</span>.<br>
+        This action cannot be undone.
+    </p>
+    <div class="confirm-actions">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        </form>
+        <a href="/" class="btn btn-ghost">Cancel</a>
+    </div>
+</div>
+{% endblock %}

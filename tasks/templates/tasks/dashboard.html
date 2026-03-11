@@ -1,0 +1,333 @@
+{% extends "tasks/base.html" %}
+{% block title %}Dashboard — Taskflow{% endblock %}
+{% block nav_dash %}active{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--text);
+    }
+
+    .page-subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 0.25rem; }
+
+    /* STATS */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem;
+        transition: border-color 0.2s;
+    }
+
+    .stat-card:hover { border-color: var(--accent); }
+
+    .stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-family: 'Syne', sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .stat-total .stat-value { color: var(--text); }
+    .stat-todo .stat-value { color: var(--muted); }
+    .stat-progress .stat-value { color: var(--blue); }
+    .stat-done .stat-value { color: var(--green); }
+    .stat-overdue .stat-value { color: var(--red); }
+
+    /* FILTERS */
+    .filters-bar {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.5rem 0.85rem;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 0.85rem;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .filter-select:focus { border-color: var(--accent); }
+    .filter-select option { background: var(--surface2); }
+
+    .search-input {
+        flex: 1;
+        min-width: 200px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.5rem 0.85rem;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 0.85rem;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--muted); }
+
+    /* TASK LIST */
+    .tasks-container { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .task-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s;
+        cursor: default;
+    }
+
+    .task-card:hover {
+        border-color: rgba(124,106,240,0.4);
+        background: var(--surface2);
+        transform: translateX(2px);
+    }
+
+    .task-card.done-card { opacity: 0.55; }
+
+    .task-check {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: all 0.2s;
+        background: none;
+        color: transparent;
+        font-size: 0.7rem;
+    }
+
+    .task-check:hover { border-color: var(--green); color: var(--green); }
+    .task-check.checked { border-color: var(--green); background: rgba(52,211,153,0.15); color: var(--green); }
+
+    .task-content { flex: 1; min-width: 0; }
+
+    .task-title {
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .task-card.done-card .task-title { text-decoration: line-through; }
+
+    .task-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.3rem;
+        flex-wrap: wrap;
+    }
+
+    .task-desc {
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-top: 0.2rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 500px;
+    }
+
+    .cat-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .cat-label { font-size: 0.78rem; color: var(--muted); }
+
+    .due-date {
+        font-size: 0.78rem;
+        color: var(--muted);
+    }
+
+    .due-date.overdue { color: var(--red); font-weight: 600; }
+
+    .task-actions {
+        display: flex;
+        gap: 0.35rem;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .task-card:hover .task-actions { opacity: 1; }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--muted);
+    }
+
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-title { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">My Tasks</h1>
+        <p class="page-subtitle">{{ stats.total }} task{{ stats.total|pluralize }} total</p>
+    </div>
+    <a href="{% url 'task_create' %}" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Task
+    </a>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card stat-total">
+        <div class="stat-label">Total</div>
+        <div class="stat-value">{{ stats.total }}</div>
+    </div>
+    <div class="stat-card stat-todo">
+        <div class="stat-label">To Do</div>
+        <div class="stat-value">{{ stats.todo }}</div>
+    </div>
+    <div class="stat-card stat-progress">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value">{{ stats.in_progress }}</div>
+    </div>
+    <div class="stat-card stat-done">
+        <div class="stat-label">Done</div>
+        <div class="stat-value">{{ stats.done }}</div>
+    </div>
+    <div class="stat-card stat-overdue">
+        <div class="stat-label">Overdue</div>
+        <div class="stat-value">{{ stats.overdue }}</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<form method="get" id="filter-form">
+    <div class="filters-bar">
+        <input class="search-input" type="text" name="q" value="{{ search_query }}" placeholder="Search tasks..." oninput="this.form.submit()">
+
+        <select class="filter-select" name="status" onchange="this.form.submit()">
+            <option value="">All Statuses</option>
+            <option value="todo" {% if status_filter == 'todo' %}selected{% endif %}>To Do</option>
+            <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+            <option value="done" {% if status_filter == 'done' %}selected{% endif %}>Done</option>
+        </select>
+
+        <select class="filter-select" name="priority" onchange="this.form.submit()">
+            <option value="">All Priorities</option>
+            <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+            <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+            <option value="urgent" {% if priority_filter == 'urgent' %}selected{% endif %}>Urgent</option>
+        </select>
+
+        <select class="filter-select" name="category" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+
+        {% if status_filter or priority_filter or category_filter or search_query %}
+        <a href="/" class="btn btn-ghost btn-sm">Clear</a>
+        {% endif %}
+    </div>
+</form>
+
+<!-- Tasks -->
+{% if tasks %}
+<div class="tasks-container">
+    {% for task in tasks %}
+    <div class="task-card {% if task.status == 'done' %}done-card{% endif %}">
+        <!-- Toggle Check -->
+        <form method="post" action="{% url 'task_toggle' task.pk %}" style="display:inline">
+            {% csrf_token %}
+            <button type="submit" class="task-check {% if task.status == 'done' %}checked{% endif %}" title="Toggle complete">
+                {% if task.status == 'done' %}✓{% else %}{% endif %}
+            </button>
+        </form>
+
+        <div class="task-content">
+            <div class="task-title">{{ task.title }}</div>
+            {% if task.description %}
+            <div class="task-desc">{{ task.description }}</div>
+            {% endif %}
+            <div class="task-meta">
+                <span class="badge badge-{{ task.status }}">{{ task.get_status_display }}</span>
+                <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+                {% if task.category %}
+                <span class="cat-dot" style="background: {{ task.category.color }}"></span>
+                <span class="cat-label">{{ task.category.name }}</span>
+                {% endif %}
+                {% if task.due_date %}
+                <span class="due-date {% if task.is_overdue %}overdue{% endif %}">
+                    {% if task.is_overdue %}⚠ Overdue · {% endif %}Due {{ task.due_date }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="task-actions">
+            <a href="{% url 'task_edit' task.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+            <a href="{% url 'task_delete' task.pk %}" class="btn btn-danger btn-sm">Delete</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">✦</div>
+    <div class="empty-title">No tasks found</div>
+    <p style="margin-bottom:1.5rem">{% if search_query or status_filter or priority_filter %}Try clearing your filters{% else %}Create your first task to get started{% endif %}</p>
+    <a href="{% url 'task_create' %}" class="btn btn-primary">+ New Task</a>
+</div>
+{% endif %}
+{% endblock %}
